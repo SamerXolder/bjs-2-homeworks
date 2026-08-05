@@ -1,133 +1,140 @@
 class PrintEditionItem {
-    constructor(name,releaseDate,pagesCount,state,type)
-    {
-        this.name = name;
-        this.releaseDate = releaseDate;
-        this.pagesCount = pagesCount;
-        this.state = 100;
-        this.type = null;
-        }
-    fix(){
-        return this.state *= 1.5;    
-}
-       set state(value) {
-        if (value < 0) {
-            this._state = 0;
-        } else if (value > 100) {
-            this._state = 100;
-        } else {
-            this._state = value;
-        }
-    }
+  constructor(name, releaseDate, pagesCount) {
+    this.name = name;
+    this.releaseDate = releaseDate;
+    this.pagesCount = pagesCount;
+    this._state = 100;
+    this.type = null;
+  }
 
-    get state(){
-        return this._state;
-    }
+  get state() {
+    return this._state;
+  }
+
+  set state(value) {
+    if (value < 0) this._state = 0;
+    else if (value > 100) this._state = 100;
+    else this._state = value;
+  }
+
+  fix() {
+    this.state *= 1.5;
+  }
+}
+
+class Magazine extends PrintEditionItem {
+  constructor(name, releaseDate, pagesCount) {
+    super(name, releaseDate, pagesCount);
+    this.type = 'magazine';
+  }
+}
+
+class Book extends PrintEditionItem {
+  constructor(name, releaseDate, pagesCount, author) {
+    super(name, releaseDate, pagesCount);
+    this.type = 'book';
+    this.author = author;
+  }
+}
+
+class NovelBook extends Book {
+  constructor(name, releaseDate, pagesCount, author) {
+    super(name, releaseDate, pagesCount, author);
+    this.type = 'novel';
+  }
+}
+
+class FantasticBook extends Book {
+  constructor(name, releaseDate, pagesCount, author) {
+    super(name, releaseDate, pagesCount, author);
+    this.type = 'fantastic';
+  }
+}
+
+class DetectiveBook extends Book {
+  constructor(name, releaseDate, pagesCount, author) {
+    super(name, releaseDate, pagesCount, author);
+    this.type = 'detective';
+  }
 }
 
 class Library {
-    constructor (name, books){
-        this.name = name;
-        this.books = [];
-    }
-
-    addBook(book){
-
-        if (book.state > 30){
-            this.books.push(book);
-        }
-
-    }
-
-    findBookBy (type, value){
-        const found = this.books.find(book => book[type] === value);
-        return found || null;
-    }
-}
-
-const myLibrary = new Library('Городская библиотека');
-console.log('Библиотека создана:', myLibrary.name);
-
-const book1 = new PrintEditionItem('Война и мир', 1869, 1300);
-book1.state = 80;
-
-const book2 = new PrintEditionItem('Мастер и Маргарита', 1967, 450);
-book2.state = 50;
-
-myLibrary.addBook(book1);
-myLibrary.addBook(book2);
-
-let book1919 = myLibrary.findBookBy('releaseDate', 1919);
-if (!book1919) {
-    console.log('Книга 1919 года не найдена – создаём новую.');
-    book1919 = new PrintEditionItem('Загадочная история', 1919, 300);
-    book1919.state = 90;
-    myLibrary.addBook(book1919);
-} else {
-    console.log('Книга 1919 года найдена:', book1919.name);
-}
-
-const issuedBook = myLibrary.books[0];
-console.log(`Выдана книга: "${issuedBook.name}" (состояние: ${issuedBook.state})`);
-
-issuedBook.state = 20;
-console.log(`Книга повреждена. Новое состояние: ${issuedBook.state}`);
-
-issuedBook.fix();
-console.log(`Книга восстановлена. Состояние после fix: ${issuedBook.state}`);
-
-myLibrary.addBook(issuedBook);
-
-console.log('\nСписок книг в библиотеке после всех операций:');
-myLibrary.books.forEach((book, index) => {
-    console.log(`${index+1}. "${book.name}" (${book.releaseDate}), состояние: ${book.state}`);
-});
-
-
-class Student {
-  constructor(name, gender, age) {
+  constructor(name) {
     this.name = name;
-    this.gender = gender;
-    this.age = age;
-    this.marks = {};
+    this.books = [];
   }
 
-  addMark(subject, mark) {
-    if (mark < 2 || mark > 5) {
-      console.warn(`Оценка ${mark} не добавлена – допустимы только 2, 3, 4, 5`);
-      return;
+  addBook(book) {
+    if (book.state > 30) {
+      this.books.push(book);
+      console.log(`Книга "${book.name}" добавлена (состояние: ${book.state})`);
+    } else {
+      console.log(`Книга "${book.name}" НЕ добавлена – состояние ${book.state} ≤ 30`);
     }
-
-    if (!this.marks[subject]) {
-      this.marks[subject] = [];
-    }
-
-    this.marks[subject].push(mark);
   }
 
-  // Средняя оценка по одному предмету
-  getAverageBySubject(subject) {
-    const marksArray = this.marks[subject];
-    if (!marksArray || marksArray.length === 0) {
-      return 0;
-    }
-
-    const sum = marksArray.reduce((acc, mark) => acc + mark, 0);
-    return sum / marksArray.length;
+  findBookBy(type, value) {
+    return this.books.find(book => book[type] === value) || null;
   }
 
-
-  getAverage() {
-    const subjects = Object.keys(this.marks);
-    // Если нет ни одного предмета – возвращаем 0
-    if (subjects.length === 0) {
-      return 0;
+  giveBookByName(bookName) {
+    const index = this.books.findIndex(book => book.name === bookName);
+    if (index !== -1) {
+      return this.books.splice(index, 1)[0];
     }
-
-    const totalAverage = subjects.reduce((acc, subject) => {
-      return acc + this.getAverageBySubject(subject);
-    }, 0);
-
-    return totalAverage / subjects.length;
+    return null;
   }
 }
+
+const library = new Library('Городская библиотека');
+
+const magazine = new Magazine('National Geographic', 2023, 80);
+magazine.state = 90;
+
+const book = new Book('Анна Каренина', 1877, 864, 'Лев Толстой');
+book.state = 70;
+
+const novel = new NovelBook('Преступление и наказание', 1866, 600, 'Фёдор Достоевский');
+novel.state = 85;
+
+const fantastic = new FantasticBook('Гарри Поттер и философский камень', 1997, 400, 'Дж.К. Роулинг');
+fantastic.state = 95;
+
+const detective = new DetectiveBook('Убийство в Восточном экспрессе', 1934, 320, 'Агата Кристи');
+detective.state = 60;
+
+library.addBook(magazine);
+library.addBook(book);
+library.addBook(novel);
+library.addBook(fantastic);
+library.addBook(detective);
+
+console.log('Всего книг после добавления:', library.books.length);
+
+let book1919 = library.findBookBy('releaseDate', 1919);
+if (!book1919) {
+  book1919 = new Book('Тайна старого замка', 1919, 250, 'Неизвестный автор');
+  book1919.state = 80;
+  library.addBook(book1919);
+}
+
+const issued = library.giveBookByName('Преступление и наказание');
+if (issued) {
+  console.log(`Выдана: "${issued.name}" (${issued.type}), состояние ${issued.state}`);
+} else {
+  console.log('Книга не найдена');
+}
+
+console.log('Осталось книг после выдачи:', library.books.length); 
+
+issued.state = 20;
+console.log('Состояние после повреждения:', issued.state);
+
+issued.fix();
+console.log('Состояние после восстановления:', issued.state);
+
+library.addBook(issued);
+
+console.log('Итоговое количество книг:', library.books.length);
+console.log('Список книг:');
+library.books.forEach(b => console.log(`- ${b.name} (${b.type}, ${b.state})`));
